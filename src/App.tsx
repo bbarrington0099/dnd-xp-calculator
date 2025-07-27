@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Plus, Minus, Info, Scroll, Sword, Shield, Star, BookOpen, Heart, Zap, Mountain, AlertTriangle, Crown } from 'lucide-react';
+import { Users, Plus, Minus, Info, Scroll, Swords, Shield, Star, BookOpen, Heart, Zap, Mountain, AlertTriangle, Crown, CloudLightning } from 'lucide-react';
 import './App.css';
 
 const DnDXPCalculator = () => {
@@ -21,7 +21,8 @@ const DnDXPCalculator = () => {
     skillSpellSolution: false,
     perilousJourney: false,
     significantFailure: false,
-    majorImpact: false
+    majorImpact: false,
+    piety: false
   });
   const [eventCounts, setEventCounts] = useState({
     attunedItem: 1,
@@ -31,7 +32,8 @@ const DnDXPCalculator = () => {
     skillSpellSolution: 1,
     perilousJourney: 1,
     significantFailure: 1,
-    majorImpact: 1
+    majorImpact: 1,
+    piety: 1
   });
   const [encounterXP, setEncounterXP] = useState(0);
 
@@ -49,6 +51,12 @@ const DnDXPCalculator = () => {
       setCharacters(newCharacters);
     }
   }, [numPlayers, sharedPartyLevel]);
+
+  useEffect(() => {
+    if (eventCounts.piety > numPlayers) {
+      setEventCounts(prev => ({ ...prev, piety: numPlayers }));
+    }
+  }, [numPlayers]);
 
   const addCharacter = () => {
     if (characters.length < 20) {
@@ -87,7 +95,8 @@ const DnDXPCalculator = () => {
   };
 
   const updateEventCount = (event, count) => {
-    setEventCounts({...eventCounts, [event]: Math.max(1, count)});
+    const clampedCount = event === 'piety' ? Math.min(numPlayers, Math.max(1, count)) : Math.max(1, count);
+    setEventCounts({...eventCounts, [event]: clampedCount});
   };
 
   const calculateXP = () => {
@@ -108,7 +117,7 @@ const DnDXPCalculator = () => {
       // Conditional XP (25 * level each)
       const conditionalEvents = [
         'attunedItem', 'bondIdealFlaw', 'relationship', 'loreDiscovery',
-        'skillSpellSolution', 'perilousJourney', 'significantFailure', 'majorImpact'
+        'skillSpellSolution', 'perilousJourney', 'significantFailure', 'majorImpact', 'piety'
       ];
       
       conditionalEvents.forEach(event => {
@@ -145,7 +154,7 @@ const DnDXPCalculator = () => {
         // Conditional XP
         const conditionalEvents = [
           'attunedItem', 'bondIdealFlaw', 'relationship', 'loreDiscovery',
-          'skillSpellSolution', 'perilousJourney', 'significantFailure', 'majorImpact'
+          'skillSpellSolution', 'perilousJourney', 'significantFailure', 'majorImpact', 'piety'
         ];
         
         conditionalEvents.forEach(event => {
@@ -179,8 +188,8 @@ const DnDXPCalculator = () => {
 
   const eventDescriptions = [
     { key: 'sessionEnd', icon: <Scroll className="w-4 h-4" />, text: 'Session completed (Level × 100 XP)', multiplier: 100, allowMultiple: false },
-    { key: 'encounters', icon: <Sword className="w-4 h-4" />, text: 'Encounters overcome (DM determined XP)', isCustom: true, allowMultiple: false },
-    { key: 'shortTermGoal', icon: <Star className="w-4 h-4" />, text: 'Short-term goal completed (Level × 200 XP)', multiplier: 200, allowMultiple: false },
+    { key: 'encounters', icon: <Swords className="w-4 h-4" />, text: 'Encounters overcome (DM determined XP)', isCustom: true, allowMultiple: false },
+    { key: 'shortTermGoal', icon: <Star className="w-4 h-4" />, text: 'Short-term goal completed by at least one character per session (Level × 200 XP)', multiplier: 200, allowMultiple: false },
     { key: 'attunedItem', icon: <Shield className="w-4 h-4" />, text: 'Character attuned to a new magic item (Level × 25 XP)', multiplier: 25, allowMultiple: true },
     { key: 'bondIdealFlaw', icon: <Heart className="w-4 h-4" />, text: 'Character invoked their Bond, Ideal or Flaw to make a meaningful impact during gameplay (Level × 25 XP)', multiplier: 25, allowMultiple: true },
     { key: 'relationship', icon: <Users className="w-4 h-4" />, text: 'Character developed a new or existing relationship in a meaningful way (NPC or PC) (Level × 25 XP)', multiplier: 25, allowMultiple: true },
@@ -188,7 +197,8 @@ const DnDXPCalculator = () => {
     { key: 'skillSpellSolution', icon: <Zap className="w-4 h-4" />, text: 'Character used a skill or spell to solve a problem in an interesting or meaningful way (Level × 25 XP)', multiplier: 25, allowMultiple: true },
     { key: 'perilousJourney', icon: <Mountain className="w-4 h-4" />, text: 'The party undertook a perilous journey that took time to complete (Level × 25 XP)', multiplier: 25, allowMultiple: true },
     { key: 'significantFailure', icon: <AlertTriangle className="w-4 h-4" />, text: 'Character failed a significant roll that resulted in wasted resources, a negative relationship with an NPC, an injury or some other major drawback (Level × 25 XP)', multiplier: 25, allowMultiple: true },
-    { key: 'majorImpact', icon: <Crown className="w-4 h-4" />, text: 'Character took actions that made a major impact in the world, or local area - For better or worse (Level × 25 XP)', multiplier: 25, allowMultiple: true }
+    { key: 'majorImpact', icon: <Crown className="w-4 h-4" />, text: 'Character took actions that made a major impact in the world, or local area - For better or worse (Level × 25 XP)', multiplier: 25, allowMultiple: true },
+    { key: 'piety', icon: <CloudLightning className="w-4 h-4" />, text:'Character increased piety level - Max XP gain is 1 per character regardless of how many Piety Points they recieved (Level × 25)', multiplier: 25, allowMultiple: true }
   ];
 
   return (
@@ -216,7 +226,9 @@ const DnDXPCalculator = () => {
                 justify their achievements. Adventurers should remain honest and fair, remembering that Experience Points represent 
                 their characters' growth and development throughout their journey. When uncertainty arises about whether conditions 
                 were met, let the wisdom of the group majority guide your decision.
-                <hr></hr>
+              </p>
+              <hr />
+              <p>
                 The point of this system is for the party to grow together. Our achievements are your achievements, as we share our stories, we share out experiences. It is recommended to use this system with a 'Shared Party Level', meaning all characters get the same XP; but it can be used with different level characters, keeping in mind that the higher the level, the greater the divide between you and your allies will grow.
               </p>
             </div>
@@ -340,8 +352,11 @@ const DnDXPCalculator = () => {
             Session Events
           </h2>
           <p className="description-text">
-            If any party member achieved any of the following, the box for that event should be checked, if multiple characters completed the same event, or one character met the requirements multiple times, increase the event's count. <hr></hr>
-            The exceptions to this are 'Session completed' which can only be achieved once per session, and 'Encounters overcome' which is the total XP of the encounters that took place in the session determined by the DM.
+            If any party member achieved any of the following, the box for that event should be checked, if multiple characters completed the same event, or one character met the requirements multiple times, increase the event's count. 
+          </p>
+          <hr />
+          <p>
+            The exceptions to this are 'Session completed' or 'Short-term goal completed' which can only be achieved once per session, and 'Encounters overcome' which is the total XP of the encounters that took place in the session determined by the DM.
           </p>
           
           <div className="events-list">
@@ -380,6 +395,7 @@ const DnDXPCalculator = () => {
                       <input
                         type="number"
                         min="1"
+                        max={event.key === "piety" ? numPlayers : null}
                         value={eventCounts[event.key]}
                         onChange={(e) => updateEventCount(event.key, parseInt(e.target.value) || 1)}
                         className="count-input"
@@ -498,19 +514,6 @@ const DnDXPCalculator = () => {
               ))}
             </div>
           )}
-        </div>
-
-        {/* Piety Reminder */}
-        <div className="reminder-box">
-          <div className="reminder-content">
-            <div className="info-tooltip">
-              <Info className="info-icon" />
-              <span className="tooltip-text">Remember to discuss any piety points earned this session</span>
-            </div>
-            <span className="reminder-text">
-              Don't forget to discuss any piety points earned during this session with your party!
-            </span>
-          </div>
         </div>
       </div>
     </div>
