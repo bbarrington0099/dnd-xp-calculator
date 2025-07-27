@@ -65,6 +65,7 @@ const DnDXPCalculator = () => {
         level: 1, 
         totalXP: 0 
       }]);
+      setNumPlayers(numPlayers + 1);
     }
   };
 
@@ -72,6 +73,7 @@ const DnDXPCalculator = () => {
     if (characters.length > 1) {
       setCharacters(characters.filter((_, i) => i !== index));
     }
+    setNumPlayers(numPlayers - 1);
   };
 
   const updateCharacter = (index, field, value) => {
